@@ -7,6 +7,7 @@ This is a custom GMMK Pro configuration for the QMK firmware.
 - `KC_HOME` moved to `KC_END`.
 - Caps Lock RGB indicator.
 - Highlight all mapped FN keys when FN is pressed.
+- ~~Razer Snap Tap~~ Key Cancellation feature enabled (acts as the game mode). Not in the stable branch, [github pull request](https://github.com/qmk/qmk_firmware/pull/24000).
 
 # TODO
-- Setup ~~Razer Snap Tap~~ Key Cancellation feature
+- Custom RGB Cycle

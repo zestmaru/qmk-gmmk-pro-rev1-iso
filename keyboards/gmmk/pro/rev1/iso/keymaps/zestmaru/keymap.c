@@ -20,7 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "rgb_matrix_map.h"
 
 #ifdef RGB_MATRIX_ENABLE
-static uint8_t l_base_functions[] = {LED_F1, LED_F2, LED_F3, LED_F4, LED_F5, LED_F6, LED_F7, LED_F8, LED_F9, LED_F10, LED_F11, LED_1, LED_W, LED_S, LED_X, LED_N, 94, 80, 98, 96}; //94, 80, 98, 96 - arrows
+static uint8_t l_base_functions[] = {LED_F1, LED_F2, LED_F3, LED_F4, LED_F5, LED_F6, LED_F7, LED_F8, LED_F9, LED_F10, LED_F11, LED_1, LED_W, LED_S, LED_X, LED_N, LED_K, 94, 80, 98, 96}; //94, 80, 98, 96 - arrows
+static uint8_t l_game_mode[] = {LED_W, LED_A, LED_S, LED_D, LED_R, LED_FN, LED_1, LED_2, LED_3, LED_4, LED_5, LED_Q, LED_Z, LED_X, LED_C, LED_LCTL, LED_LSFT, LED_LALT, LED_G, LED_E, LED_B, LED_SPC, LED_TAB, LED_CAPS, 94, 80, 98, 96};
+#define SIZE_OF_BASE_FUNCTIONS (sizeof(l_base_functions) / sizeof(l_base_functions[0]))
+#define SIZE_OF_GAME_MODE (sizeof(l_game_mode) / sizeof(l_game_mode[0]))
 #endif
 
 // clang-format off
@@ -55,12 +58,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 
     [1] = LAYOUT(
-        _______, KC_MYCM, KC_WHOM, KC_CALC, KC_MSEL, KC_MPRV, KC_MNXT, KC_MPLY, KC_MSTP, KC_MUTE, KC_VOLD, KC_VOLU, _______, _______,          _______,
-        _______, RGB_TOG, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, QK_BOOT,          _______,
-        _______, _______, RGB_VAI, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                   _______,
-        _______, _______, RGB_VAD, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,
-        _______, _______, _______, RGB_HUI, _______, _______, _______, NK_TOGG, _______, _______, _______, _______,          _______, RGB_MOD, _______,
-        _______, _______, _______,                            _______,                            _______, _______, _______, RGB_SPD, RGB_RMOD, RGB_SPI
+        _______, KC_MYCM, KC_WHOM, KC_CALC, KC_MSEL, KC_MPRV, KC_MNXT, KC_MPLY, KC_MSTP, KC_MUTE, KC_VOLD, KC_VOLU, _______, _______,                           _______,
+        _______, RGB_TOG, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                           _______,
+        _______, _______, RGB_VAI, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                                    _______,
+        _______, _______, RGB_VAD, _______, _______, _______, _______, _______, KX_CATG, _______, _______, _______, _______, _______,                           _______,
+        _______, _______, _______, RGB_HUI, _______, _______, _______, NK_TOGG, _______, _______, _______, _______,          _______,        RGB_MOD,           _______,
+        _______, _______, _______,                            _______,                            _______, _______, _______,        RGB_SPD, RGB_RMOD, RGB_SPI
     ),
 
 
@@ -72,9 +75,9 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {[0] = {ENC
 #endif
 
 #ifdef RGB_MATRIX_ENABLE
-bool is_in_base_functions(uint8_t value) {
-    for (uint8_t i = 0; i < sizeof(l_base_functions) / sizeof(l_base_functions[0]); i++) {
-        if (l_base_functions[i] == value) {
+bool is_in_list(uint8_t value, const uint8_t *list, size_t list_size) {
+    for (size_t i = 0; i < list_size; i++) {
+        if (list[i] == value) {
             return true;
         }
     }
@@ -109,11 +112,22 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         return false;
     }
 
+    // kinda game mode. 
+    for (uint8_t i = led_min; i < led_max; i++) {
+        if (key_cancellation_is_enabled()) {
+            if (is_in_list(i, l_game_mode, SIZE_OF_GAME_MODE)) {
+                RGB_MATRIX_INDICATOR_SET_COLOR(i, 255, 0, 0); // only game mode keys
+            } else {
+                RGB_MATRIX_INDICATOR_SET_COLOR(i, 0, 0, 0); // do not light others keys
+            }
+        }
+    }
+
     // fn keys
     switch (get_highest_layer(layer_state)) {
         case 1:
             for (uint8_t i = led_min; i < led_max; i++) {
-                if (is_in_base_functions(i)) {
+                if (is_in_list(i, l_base_functions, SIZE_OF_BASE_FUNCTIONS)) {
                     RGB_MATRIX_INDICATOR_SET_COLOR(i, tempRGB.r, tempRGB.g, tempRGB.b); // only fn keys
                 } else {
                     RGB_MATRIX_INDICATOR_SET_COLOR(i, 0, 0, 0); // do not light others keys
@@ -126,3 +140,15 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     return false;
 }
 #endif // RGB_MATRIX_ENALBED
+
+#if defined(KEY_CANCELLATION_ENABLE)
+const key_cancellation_t PROGMEM key_cancellation_list[] = {
+    // on key down
+    //       |    key to be released
+    //       |     |
+    [0] = {KC_D, KC_A},
+    [1] = {KC_A, KC_D},
+    [2] = {KC_W, KC_S},
+    [3] = {KC_S, KC_W},
+};
+#endif //KEY_CANCELLATION_ENABLE
