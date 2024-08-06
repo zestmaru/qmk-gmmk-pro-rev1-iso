@@ -4,7 +4,8 @@
 This is a custom GMMK Pro configuration for the QMK firmware.
 
 # Features
-- CAPS Lock RGB indicator.
+- `KC_HOME` moved to `KC_END`.
+- Caps Lock RGB indicator.
 - Highlight all mapped FN keys when FN is pressed.
 
 # TODO
