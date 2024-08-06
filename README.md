@@ -9,4 +9,4 @@ This is a custom GMMK Pro configuration for the QMK firmware.
 - Highlight all mapped FN keys when FN is pressed.
 
 # TODO
-- Setup Snap Tap feature
+- Setup ~~Razer Snap Tap~~ Key Cancellation feature
