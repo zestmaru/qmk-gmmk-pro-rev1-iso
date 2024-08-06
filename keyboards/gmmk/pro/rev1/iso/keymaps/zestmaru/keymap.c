@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "rgb_matrix_map.h"
 
 #ifdef RGB_MATRIX_ENABLE
-static uint8_t l_base_functions[] = {LED_F1, LED_F2, LED_F3, LED_F4, LED_F5, LED_F6, LED_F7, LED_F8, LED_F9, LED_F10, LED_F11, LED_1, LED_W, LED_S, LED_X, LED_N, 94, 80, 98, 96};
+static uint8_t l_base_functions[] = {LED_F1, LED_F2, LED_F3, LED_F4, LED_F5, LED_F6, LED_F7, LED_F8, LED_F9, LED_F10, LED_F11, LED_1, LED_W, LED_S, LED_X, LED_N, 94, 80, 98, 96}; //94, 80, 98, 96 - arrows
 #endif
 
 // clang-format off
@@ -72,28 +72,36 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {[0] = {ENC
 #endif
 
 #ifdef RGB_MATRIX_ENABLE
+bool is_in_base_functions(uint8_t value) {
+    for (uint8_t i = 0; i < sizeof(l_base_functions) / sizeof(l_base_functions[0]); i++) {
+        if (l_base_functions[i] == value) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     static uint32_t cycle_led_timer    = 0;
     static uint8_t  current_value      = 0;
+    if (timer_elapsed32(cycle_led_timer) > 500) {
+        current_value   = current_value == 0 ? 255 : 0;
+        cycle_led_timer = timer_read32();
+    }
+    HSV tempHSV = {.h = 0, .s = 255, .v = current_value};
+    RGB tempRGB = hsv_to_rgb(tempHSV);
+
     static uint8_t  left_side_leds[8]  = {68, 71, 74, 77, 81, 84, 88, 92};
     static uint8_t  right_side_leds[8] = {69, 72, 75, 78, 82, 85, 89, 93};
 
     if (host_keyboard_led_state().caps_lock) {
-        if (timer_elapsed32(cycle_led_timer) > 500) {
-            current_value   = current_value == 0 ? 255 : 0;
-            cycle_led_timer = timer_read32();
-        }
-
-        HSV tempHSV = {.h = 0, .s = 255, .v = current_value};
-        RGB tempRGB = hsv_to_rgb(tempHSV);
-
         // flash side panels
         for (uint8_t i = 0; i < sizeof(left_side_leds) / sizeof(left_side_leds[0]); i++) {
             rgb_matrix_set_color(left_side_leds[i], tempRGB.r, tempRGB.g, tempRGB.b);
             rgb_matrix_set_color(right_side_leds[i], tempRGB.r, tempRGB.g, tempRGB.b);
         }
 
-        // set all leds to the caps lock color
+        // flash all keys
         for (uint8_t i = led_min; i < led_max; i++) {
             rgb_matrix_set_color(i, tempRGB.r, tempRGB.g, tempRGB.b);
         }
@@ -101,39 +109,19 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         return false;
     }
 
-    if (layer_state_is(_FN)) { 
-        HSV tempHSV = {.h = 120, .s = 255, .v = 255};
-        RGB tempRGB = hsv_to_rgb(tempHSV);
-
-        for (uint8_t i = led_min; i < led_max; i++) {
-            rgb_matrix_set_color(i, 0, 0, 0);
-        }
-
-        for (uint8_t i = 0; i < sizeof(l_base_functions) / sizeof(l_base_functions[0]); i++) {
-            rgb_matrix_set_color(l_base_functions[i], tempRGB.r, tempRGB.g, tempRGB.b);
-        }
-
-        return false;
-    }
-
-    // highlight fn keys
-    switch (get_highest_layer(layer_state)) { 
+    // fn keys
+    switch (get_highest_layer(layer_state)) {
         case 1:
-            static uint32_t cycle_led_timer    = 0;
-            static uint8_t  current_value      = 0;
-            if (timer_elapsed32(cycle_led_timer) > 500) {
-                current_value   = current_value == 0 ? 255 : 0;
-                cycle_led_timer = timer_read32();
-            }
-            HSV tempHSV = {.h = 0, .s = 255, .v = current_value};
-            RGB tempRGB = hsv_to_rgb(tempHSV);
-            for (uint8_t i = 0; i < sizeof(l_base_functions) / sizeof(l_base_functions[0]); i++) {
-                RGB_MATRIX_INDICATOR_SET_COLOR(l_base_functions[i], tempRGB.r, tempRGB.g, tempRGB.b);
+            for (uint8_t i = led_min; i < led_max; i++) {
+                if (is_in_base_functions(i)) {
+                    RGB_MATRIX_INDICATOR_SET_COLOR(i, tempRGB.r, tempRGB.g, tempRGB.b); // only fn keys
+                } else {
+                    RGB_MATRIX_INDICATOR_SET_COLOR(i, 0, 0, 0); // do not light others keys
+                }
             }
             break;
         default:
             break;
-        break;
     }
     return false;
 }
