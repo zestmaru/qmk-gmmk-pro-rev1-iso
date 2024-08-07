@@ -148,7 +148,7 @@ const key_cancellation_t PROGMEM key_cancellation_list[] = {
     //       |     |
     [0] = {KC_D, KC_A},
     [1] = {KC_A, KC_D},
-    [2] = {KC_W, KC_S},
-    [3] = {KC_S, KC_W},
+    // [2] = {KC_W, KC_S}, //WS are useless
+    // [3] = {KC_S, KC_W},
 };
 #endif //KEY_CANCELLATION_ENABLE
