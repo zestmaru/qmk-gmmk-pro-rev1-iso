@@ -29,12 +29,12 @@ static uint8_t l_game_mode[] = {LED_W, LED_A, LED_S, LED_D, LED_R, LED_FN, LED_1
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
-//      ESC      F1       F2       F3       F4       F5       F6       F7       F8       F9       F10      F11      F12	     Prt                        Rotary(Mute)
-//      ~        1        2        3        4        5        6        7        8        9        0         -       (=)	     BackSpc                    Del
-//      Tab      Q        W        E        R        T        Y        U        I        O        P        [        ]                                   PgUp
-//      Caps     A        S        D        F        G        H        J        K        L        ;        "        #        Enter                      PgDn
-//      Sh_L     /        Z        X        C        V        B        N        M        ,        .        ?                 Sh_R     Up                Home
-//      Ct_L     Win_L    Alt_L                               SPACE                               Alt_R    FN       Ct_R     Left     Down     Right
+//      ESC      F1       F2       F3       F4       F5       F6       F7       F8       F9       F10      F11      F12	     Prt                            Rotary(Mute)
+//      ~        1        2        3        4        5        6        7        8        9        0         -       (=)	     BackSpc                            Del
+//      Tab      Q        W        E        R        T        Y        U        I        O        P        [        ]                                           PgUp
+//      Caps     A        S        D        F        G        H        J        K        L        ;        "        #        Enter                              PgDn
+//      Sh_L     /        Z        X        C        V        B        N        M        ,        .        ?                 Sh_R             Up                Home
+//      Ct_L     Win_L    Alt_L                               SPACE                               Alt_R    FN       Ct_R            Left     Down     Right
 
 
     // The FN key by default maps to a momentary toggle to layer 1 to provide access to the QK_BOOT key (to put the board into bootloader mode). Without
